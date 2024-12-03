@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req } from '@nestjs/common';
 import { ExpenseService } from './expense.service';
 import { Expense } from './expense.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -9,32 +9,36 @@ export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}
 
   @Get()
-  findAll(): Promise<Expense[]> {
-    return this.expenseService.findAll();
+  findAll(@Req() req): Promise<Expense[]> {
+    const userId = req.user.id;
+    return this.expenseService.findAll(userId);
   }
 
   @Post()
-  create(@Body() expense: Partial<Expense>): Promise<Expense> {
-    return this.expenseService.create(expense);
+  create(@Body() expense: Partial<Expense>, @Req() req): Promise<Expense> {
+    const userId = req.user.id;
+    return this.expenseService.create(expense, userId);
   }
 
-  // Consulta por intervalo de data
   @Get('by-date')
   findByDateRange(
     @Body() { startDate, endDate }: { startDate: string; endDate: string },
+    @Req() req,
   ): Promise<Expense[]> {
-    return this.expenseService.findByDateRange(startDate, endDate);
+    const userId = req.user.id;
+    return this.expenseService.findByDateRange(startDate, endDate, userId);
   }
 
-  // Atualizar um registro de despesa
+
   @Put(':id')
-  update(@Param('id') id: number, @Body() expense: Partial<Expense>): Promise<Expense> {
-    return this.expenseService.update(id, expense);
+  update(@Param('id') id: number, @Body() expense: Partial<Expense>, @Req() req): Promise<Expense> {
+    const userId = req.user.id;
+    return this.expenseService.update(id, expense, userId);
   }
 
-  // Excluir um registro de despesa
   @Delete(':id')
-  delete(@Param('id') id: string): Promise<void> {
-    return this.expenseService.delete(id);
+  delete(@Param('id') id: string, @Req() req): Promise<void> {
+    const userId = req.user.id;
+    return this.expenseService.delete(id, userId);
   }
 }
