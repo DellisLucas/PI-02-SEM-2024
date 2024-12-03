@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { User } from '../user/user.entity';
 
 @Entity()
 export class Expense {
@@ -11,6 +12,9 @@ export class Expense {
   @Column('decimal')
   amount: number;
 
-  @Column({ type: 'date' })
+  @Column('date')
   date: string;
+
+  @ManyToOne(() => User, (user) => user.expenses, { eager: true })
+  user: User;
 }
