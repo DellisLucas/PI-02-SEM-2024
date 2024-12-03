@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req } from '@nestjs/common';
 import { IncomeService } from './income.service';
 import { Income } from './income.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -9,32 +9,35 @@ export class IncomeController {
   constructor(private readonly incomeService: IncomeService) {}
 
   @Get()
-  findAll(): Promise<Income[]> {
-    return this.incomeService.findAll();
+  findAll(@Req() req): Promise<Income[]> {
+    const userId = req.user.id;
+    return this.incomeService.findAll(userId);
   }
 
   @Post()
-  create(@Body() income: Partial<Income>): Promise<Income> {
-    return this.incomeService.create(income);
+  create(@Body() income: Partial<Income>, @Req() req): Promise<Income> {
+    const userId = req.user.id;
+    return this.incomeService.create(income, userId);
   }
 
-  // Consulta por intervalo de data
   @Get('by-date')
   findByDateRange(
     @Body() { startDate, endDate }: { startDate: string; endDate: string },
+    @Req() req,
   ): Promise<Income[]> {
-    return this.incomeService.findByDateRange(startDate, endDate);
+    const userId = req.user.id;
+    return this.incomeService.findByDateRange(startDate, endDate, userId);
   }
 
-  // Atualizar um registro de renda
   @Put(':id')
-  update(@Param('id') id: number, @Body() income: Partial<Income>): Promise<Income> {
-    return this.incomeService.update(id, income);
+  update(@Param('id') id: number, @Body() income: Partial<Income>, @Req() req): Promise<Income> {
+    const userId = req.user.id;
+    return this.incomeService.update(id, income, userId);
   }
 
-  // Excluir um registro de renda
   @Delete(':id')
-  delete(@Param('id') id: string): Promise<void> {
-    return this.incomeService.delete(id);
+  delete(@Param('id') id: string, @Req() req): Promise<void> {
+    const userId = req.user.id;
+    return this.incomeService.delete(id, userId);
   }
 }

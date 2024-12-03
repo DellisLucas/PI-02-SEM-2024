@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Income } from './income.entity';
@@ -10,33 +10,38 @@ export class IncomeService {
     private incomeRepository: Repository<Income>,
   ) {}
 
-  findAll(): Promise<Income[]> {
-    return this.incomeRepository.find();
+  async findAll(userId: number): Promise<Income[]> {
+    return this.incomeRepository.find({ where: { user: { id: userId } } });
   }
 
-  create(income: Partial<Income>): Promise<Income> {
-    const newIncome = this.incomeRepository.create(income);
+  async create(income: Partial<Income>, userId: number): Promise<Income> {
+    const newIncome = this.incomeRepository.create({ ...income, user: { id: userId } });
     return this.incomeRepository.save(newIncome);
   }
 
-  // Método para consultar por intervalo de data
-  async findByDateRange(startDate: string, endDate: string): Promise<Income[]> {
+  async findByDateRange(startDate: string, endDate: string, userId: number): Promise<Income[]> {
     return this.incomeRepository
       .createQueryBuilder('income')
       .where('income.date >= :startDate', { startDate })
       .andWhere('income.date <= :endDate', { endDate })
+      .andWhere('income.user.id = :userId', { userId })
       .getMany();
   }
 
-  // Atualizar um registro
-  async update(id: number, income: Partial<Income>): Promise<Income> {
-    await this.incomeRepository.update(id, income);
-    return this.incomeRepository.findOne({ where: { id } }); // Corrigido aqui
+  async update(id: number, income: Partial<Income>, userId: number): Promise<Income> {
+    const existingIncome = await this.incomeRepository.findOne({ where: { id, user: { id: userId } } });
+    if (!existingIncome) {
+      throw new NotFoundException('Receita não encontrada ou não pertence ao usuário.');
+    }
+    Object.assign(existingIncome, income);
+    return this.incomeRepository.save(existingIncome);
   }
 
-
-  // Excluir um registro
-  async delete(id: string): Promise<void> {
+  async delete(id: string, userId: number): Promise<void> {
+    const income = await this.incomeRepository.findOne({ where: { id: +id, user: { id: userId } } });
+    if (!income) {
+      throw new NotFoundException('Receita não encontrada ou não pertence ao usuário.');
+    }
     await this.incomeRepository.delete(id);
   }
 }
