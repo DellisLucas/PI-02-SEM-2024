@@ -1,13 +1,19 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ReportsController } from './report.controller';
 import { ReportsService } from './report.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Expense } from '../expense/expense.entity';
-import { Income } from '../income/income.entity';
+import { Income, IncomeSchema } from '../income/schemas/income.schema';
+import { Expense, ExpenseSchema } from '../expense/schemas/expense.schema';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Expense, Income])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Income.name, schema: IncomeSchema },
+      { name: Expense.name, schema: ExpenseSchema }
+    ])
+  ],
   controllers: [ReportsController],
   providers: [ReportsService],
+  exports: [ReportsService]
 })
-export class ReportsModule {}
+export class ReportModule {}
