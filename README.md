@@ -15,7 +15,6 @@ O CashTab Backend é uma API RESTful desenvolvida em NestJS que fornece funciona
 - **JWT** - Tokens de autenticação
 - **bcryptjs** - Criptografia de senhas
 - **class-validator** - Validação de dados
-- **ExcelJS** - Geração de relatórios em Excel
 - **TypeScript** - Linguagem de programação
 
 ## 📁 Estrutura do Projeto
