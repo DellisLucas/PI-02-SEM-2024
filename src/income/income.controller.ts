@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req } from '@nestjs/common';
 import { IncomeService } from './income.service';
-import { Income } from './income.entity';
+import { Income } from './schemas/income.schema';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CreateIncomeDto } from './dto/create-income.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('incomes')
@@ -15,9 +16,9 @@ export class IncomeController {
   }
 
   @Post()
-  create(@Body() income: Partial<Income>, @Req() req): Promise<Income> {
+  create(@Body() createIncomeDto: CreateIncomeDto, @Req() req): Promise<Income> {
     const userId = req.user.id;
-    return this.incomeService.create(income, userId);
+    return this.incomeService.create({ ...createIncomeDto, userId });
   }
 
   @Get('by-date')
@@ -26,18 +27,16 @@ export class IncomeController {
     @Req() req,
   ): Promise<Income[]> {
     const userId = req.user.id;
-    return this.incomeService.findByDateRange(startDate, endDate, userId);
+    return this.incomeService.getByDateRange(userId, new Date(startDate), new Date(endDate));
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() income: Partial<Income>, @Req() req): Promise<Income> {
-    const userId = req.user.id;
-    return this.incomeService.update(id, income, userId);
+  update(@Param('id') id: string, @Body() income: Partial<Income>): Promise<Income> {
+    return this.incomeService.update(id, income);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string, @Req() req): Promise<void> {
-    const userId = req.user.id;
-    return this.incomeService.delete(id, userId);
+  remove(@Param('id') id: string): Promise<Income> {
+    return this.incomeService.remove(id);
   }
 }
