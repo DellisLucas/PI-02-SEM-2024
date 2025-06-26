@@ -207,7 +207,6 @@ O sistema está configurado para aceitar requisições de:
 - `http://10.0.0.6:8081`
 - `exp://192.168.1.*:8081`
 - `capacitor://*`
-- `ionic://*`
 
 ### Validação Global
 - **whitelist**: true - Remove propriedades não decoradas
