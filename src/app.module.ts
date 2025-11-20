@@ -1,26 +1,22 @@
 // src/app.module.ts
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 import { IncomeModule } from './income/income.module';
 import { ExpenseModule } from './expense/expense.module';
-import { ReportsModule } from './report/report.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'db.sqlite',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      logging: true,
-      synchronize: true,
-    }),
-    AuthModule,
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/cashtab'),
     UserModule,
+    AuthModule,
     IncomeModule,
     ExpenseModule,
-    ReportsModule, 
+    ReportModule,
   ],
 })
 export class AppModule {}
